@@ -3,7 +3,7 @@
 $servername = "/cloudsql/gcp-learning-2008:us-central1:ashwani";  // Replace with your Cloud SQL connection name
 $username = "ashwani";  // MySQL username
 $password = "ashwani";  // MySQL password
-$dbname = "registered";  // MySQL database name
+$dbname = "lamp_db";  // MySQL database name
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
