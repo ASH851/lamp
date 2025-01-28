@@ -25,7 +25,6 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          install_components: artifacts
 
       # Step 4: Configure Docker to use Google Artifact Registry
       - name: Configure Docker for GCP Artifact Registry
