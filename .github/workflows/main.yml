@@ -7,7 +7,7 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT }}  # Ensure this is correctly set from GitHub secrets
   REGION: us-central1
-  SERVICE_NAME: lamp
+  SERVICE_NAME: lamp-service
   REPOSITORY: my-repo
   IMAGE: lamp-image
   CLOUD_SQL_CONNECTION_NAME: ${{ secrets.CLOUD_SQL_CONNECTION_NAME }}  # Cloud SQL connection name (secret)
