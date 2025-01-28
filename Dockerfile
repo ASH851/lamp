@@ -10,17 +10,14 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install mysqli gd \
     && docker-php-ext-enable mysqli
 
-# Configure MySQL
-RUN service mysql start && mysql -e "CREATE DATABASE registered;" \
-    && mysql -e "CREATE USER 'ashwani'@'localhost' IDENTIFIED BY 'ashwani';" \
-    && mysql -e "GRANT ALL PRIVILEGES ON registered.* TO 'ashwani'@'localhost';" \
-    && mysql -e "FLUSH PRIVILEGES;"
-
-# Copy app files
+# Copy app files to Apache server directory
 COPY . /var/www/html
 
 # Expose port 80 for Apache
 EXPOSE 80
 
-# Start MySQL and Apache on container start
+# Copy MySQL initialization script
+COPY init.sql /docker-entrypoint-initdb.d/
+
+# Start both MySQL and Apache when the container starts
 CMD service mysql start && apache2-foreground
