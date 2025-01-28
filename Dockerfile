@@ -1,22 +1,39 @@
-# Use the official PHP image with Apache
+# Use official PHP image with Apache as the base image
 FROM php:8.0-apache
 
-# Install MySQL client and Cloud SQL connector
-RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev mysql-client
-RUN apt-get install -y gcc g++ make && pecl install mysqlnd && docker-php-ext-enable mysqlnd
+# Install necessary dependencies
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    default-mysql-client \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd
 
-# Install Cloud SQL connector
-RUN apt-get install -y curl
-RUN curl -sSL https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -o /cloud_sql_proxy
-RUN chmod +x /cloud_sql_proxy
-
-# Expose port 8080 for Cloud Run
-ENV PORT 8080
-EXPOSE 8080
-
-# Enable Apache mod_rewrite and copy the app
+# Enable mod_rewrite for Apache (commonly needed for LAMP stack)
 RUN a2enmod rewrite
+
+# Copy application files to the container
 COPY . /var/www/html/
 
-# Command to run the Cloud SQL Proxy and Apache
-CMD /cloud_sql_proxy -dir=/cloudsql -project=$GOOGLE_CLOUD_PROJECT -instances=$CLOUD_SQL_CONNECTION_NAME & apache2-foreground
+# Set environment variables for Cloud SQL connection (adjust accordingly)
+ENV CLOUD_SQL_CONNECTION_NAME="your-project-id:your-region:your-db-instance"
+ENV DB_HOST="/cloudsql/${CLOUD_SQL_CONNECTION_NAME}"
+ENV DB_USERNAME="your-db-username"
+ENV DB_PASSWORD="your-db-password"
+ENV DB_NAME="lamp_db"
+
+# Install Cloud SQL Proxy (optional if needed for connecting to Cloud SQL)
+RUN apt-get install -y curl \
+    && curl -sSL https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -o /cloud_sql_proxy \
+    && chmod +x /cloud_sql_proxy \
+    && mv /cloud_sql_proxy /usr/local/bin/
+
+# Set entrypoint to run Cloud SQL Proxy (if you're using it)
+ENTRYPOINT ["/usr/local/bin/cloud_sql_proxy", "-dir=/cloudsql"]
+
+# Expose the default Apache port
+EXPOSE 80
+
+# Define the command to run your app
+CMD ["apache2-foreground"]
