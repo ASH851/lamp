@@ -1,16 +1,13 @@
 <?php
-// MySQL database connection details
-$servername = "/cloudsql/gcp-learning-2008:us-central1:ashwani";  // Replace with your Cloud SQL connection name
-$username = "ashwani";  // MySQL username
-$password = "ashwani";  // MySQL password
-$dbname = "lamp_db";  // MySQL database name
+$db_host = getenv('CLOUD_SQL_CONNECTION_NAME') ? '/cloudsql/' . getenv('CLOUD_SQL_CONNECTION_NAME') : '127.0.0.1';
+$db_user = getenv('DB_USERNAME') ?: 'ashwani';
+$db_pass = getenv('DB_PASSWORD') ?: 'ashwani';
+$db_name = getenv('DB_NAME') ?: 'lamp_db';
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
+$conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
 
-// Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-echo "Connected successfully to MySQL database!";
+echo "Connected successfully";
 ?>
