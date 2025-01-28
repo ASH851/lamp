@@ -1,12 +1,15 @@
 <?php
-$host = 'localhost'; // Use 'localhost' for MySQL inside the same container
-$username = 'ashwani'; 
-$password = 'ashwani'; 
-$database = 'registered';
+$servername = '/cloudsql/' . getenv('DB_HOST'); // This will use the Cloud SQL socket
+$username = getenv('DB_USER');
+$password = getenv('DB_PASSWORD');
+$dbname = getenv('DB_NAME');
 
-$conn = mysqli_connect($host, $username, $password, $database);
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
+// Check connection
+if ($conn->connect_error) {
+  die("Connection failed: " . $conn->connect_error);
 }
+echo "Connected successfully";
 ?>
