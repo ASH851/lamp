@@ -1,8 +1,10 @@
 # Step 1: Use an official PHP image as the base image
-FROM php:8.1-apache
+FROM php:7.4-apache
 
-# Step 2: Install MySQL client and any dependencies
-RUN apt-get update && apt-get install -y libmysqlclient-dev
+# Step 2: Update the package list and install dependencies
+RUN apt-get update && apt-get install -y \
+    libmysqlclient-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Step 3: Set the environment variable for the port Cloud Run uses
 ENV APACHE_LISTEN 8080
@@ -20,8 +22,8 @@ COPY . /var/www/html/
 RUN chown -R www-data:www-data /var/www/html/
 
 # Step 8: Set environment variables for database connection (can be overridden at runtime)
-# These are defaults. Make sure these are set in Cloud Run or as secrets
-ENV DB_HOST=/cloudsql/${DB_HOST}
+# This DB_HOST value will be set dynamically by Cloud Run
+ENV DB_HOST /cloudsql/${DB_INSTANCE_CONNECTION_NAME}
 ENV DB_USER=${DB_USER}
 ENV DB_PASSWORD=${DB_PASSWORD}
 ENV DB_NAME=${DB_NAME}
