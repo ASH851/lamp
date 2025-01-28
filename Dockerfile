@@ -3,7 +3,7 @@ FROM php:7.4-apache
 
 # Step 2: Update the package list and install dependencies
 RUN apt-get update && apt-get install -y \
-    libmysqlclient-dev \
+    default-libmysqlclient-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Step 3: Set the environment variable for the port Cloud Run uses
