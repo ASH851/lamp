@@ -42,12 +42,12 @@ jobs:
       run: |
         gcloud auth configure-docker us-central1-docker.pkg.dev
 
-    # Step 5: Build and Push Docker Image using Docker GitHub Action
+    # Step 5: Build and Push Docker Image to Artifact Registry
     - name: Build and Push Docker Image to Artifact Registry
       uses: docker/build-push-action@v2
       with:
-        context: .
-        file: ./Dockerfile
+        context: .  # Set the build context to the repository root
+        file: ./Dockerfile  # Ensure Dockerfile is in the root
         push: true
         tags: us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
 
