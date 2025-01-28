@@ -8,12 +8,12 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT }}
   REGION: us-central1
   SERVICE_NAME: lamp
-  REPOSITORY: lamp-repo
+  REPOSITORY: my-repo
   IMAGE: lamp-image
-  CLOUD_SQL_CONNECTION_NAME: ${{ secrets.CLOUD_SQL_CONNECTION_NAME }} # Add this as a secret in GitHub
-  DB_USERNAME: ${{ secrets.DB_USERNAME }} # Add this as a secret
-  DB_PASSWORD: ${{ secrets.DB_PASSWORD }} # Add this as a secret
-  DB_NAME: lamp_db # Add this as a secret or environment variable
+  CLOUD_SQL_CONNECTION_NAME: ${{ secrets.CLOUD_SQL_CONNECTION_NAME }}  # Cloud SQL connection name (secret)
+  DB_USERNAME: ${{ secrets.DB_USERNAME }}  # DB username (secret)
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}  # DB password (secret)
+  DB_NAME: lamp_db  # Replace with your DB name
 
 jobs:
   build-deploy:
@@ -42,7 +42,7 @@ jobs:
       run: |
         gcloud auth configure-docker us-central1-docker.pkg.dev
 
-    # Step 5: Build and Push Docker Image to Artifact Registry
+    # Step 5: Build and Push Docker Image using Docker GitHub Action
     - name: Build and Push Docker Image to Artifact Registry
       uses: docker/build-push-action@v2
       with:
@@ -51,7 +51,7 @@ jobs:
         push: true
         tags: us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
 
-    # Step 6: Deploy Docker Image to Cloud Run with Cloud SQL connectivity
+    # Step 6: Deploy Docker Image to Cloud Run
     - name: Deploy to Cloud Run
       uses: google-github-actions/deploy-cloudrun@v2
       with:
@@ -59,11 +59,11 @@ jobs:
         region: ${{ env.REGION }}
         service: ${{ env.SERVICE_NAME }}
         image: us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
-        env_vars:
-          CLOUD_SQL_CONNECTION_NAME: ${{ env.CLOUD_SQL_CONNECTION_NAME }}
-          DB_USERNAME: ${{ env.DB_USERNAME }}
-          DB_PASSWORD: ${{ env.DB_PASSWORD }}
-          DB_NAME: ${{ env.DB_NAME }}
+        env_vars: |
+          CLOUD_SQL_CONNECTION_NAME=${{ secrets.CLOUD_SQL_CONNECTION_NAME }}
+          DB_USERNAME=${{ secrets.DB_USERNAME }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_NAME=${{ env.DB_NAME }}
         env_vars_update_strategy: merge
         secrets_update_strategy: merge
         no_traffic: false
