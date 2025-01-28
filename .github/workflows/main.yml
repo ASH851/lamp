@@ -51,7 +51,15 @@ jobs:
         push: true
         tags: us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
 
-    # Step 6: Deploy Docker Image to Cloud Run
+    # Step 6: Debug environment variables (for troubleshooting)
+    - name: Debug environment variables
+      run: |
+        echo "CLOUD_SQL_CONNECTION_NAME: $CLOUD_SQL_CONNECTION_NAME"
+        echo "DB_USERNAME: $DB_USERNAME"
+        echo "DB_PASSWORD: $DB_PASSWORD"
+        echo "DB_NAME: $DB_NAME"
+
+    # Step 7: Deploy Docker Image to Cloud Run
     - name: Deploy to Cloud Run
       uses: google-github-actions/deploy-cloudrun@v2
       with:
@@ -68,7 +76,7 @@ jobs:
         secrets_update_strategy: merge
         no_traffic: false
 
-    # Step 7: Allow Unauthenticated Access to Cloud Run
+    # Step 8: Allow Unauthenticated Access to Cloud Run
     - name: Allow Unauthenticated Access to Cloud Run
       run: |
         gcloud run services add-iam-policy-binding ${{ env.SERVICE_NAME }} \
