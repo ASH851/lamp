@@ -1,0 +1,78 @@
+name: Deploy LAMP App to Cloud Run
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+  REGION: us-central1
+  SERVICE_NAME: lamp
+  REPOSITORY: lamp-repo
+  IMAGE: lamp-image
+  CLOUD_SQL_CONNECTION_NAME: ${{ secrets.CLOUD_SQL_CONNECTION_NAME }} # Add this as a secret in GitHub
+  DB_USERNAME: ${{ secrets.DB_USERNAME }} # Add this as a secret
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }} # Add this as a secret
+  DB_NAME: lamp_db # Add this as a secret or environment variable
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    # Step 2: Authenticate to Google Cloud
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+    # Step 3: Set up gcloud CLI
+    - name: Set up gcloud CLI
+      uses: google-github-actions/setup-gcloud@v2
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+        install_components: 'beta'
+
+    # Step 4: Set up Docker authentication for Artifact Registry
+    - name: Set up Docker authentication
+      run: |
+        gcloud auth configure-docker us-central1-docker.pkg.dev
+
+    # Step 5: Build and Push Docker Image to Artifact Registry
+    - name: Build and Push Docker Image to Artifact Registry
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
+
+    # Step 6: Deploy Docker Image to Cloud Run with Cloud SQL connectivity
+    - name: Deploy to Cloud Run
+      uses: google-github-actions/deploy-cloudrun@v2
+      with:
+        project_id: ${{ env.PROJECT_ID }}
+        region: ${{ env.REGION }}
+        service: ${{ env.SERVICE_NAME }}
+        image: us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
+        env_vars:
+          CLOUD_SQL_CONNECTION_NAME: ${{ env.CLOUD_SQL_CONNECTION_NAME }}
+          DB_USERNAME: ${{ env.DB_USERNAME }}
+          DB_PASSWORD: ${{ env.DB_PASSWORD }}
+          DB_NAME: ${{ env.DB_NAME }}
+        env_vars_update_strategy: merge
+        secrets_update_strategy: merge
+        no_traffic: false
+
+    # Step 7: Allow Unauthenticated Access to Cloud Run
+    - name: Allow Unauthenticated Access to Cloud Run
+      run: |
+        gcloud run services add-iam-policy-binding ${{ env.SERVICE_NAME }} \
+          --member="allUsers" \
+          --role="roles/run.invoker" \
+          --region=${{ env.REGION }} \
+          --project=${{ env.PROJECT_ID }}
