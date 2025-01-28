@@ -20,7 +20,11 @@ RUN chown -R www-data:www-data /var/www/html \
 # Copy the MySQL initialization script
 COPY init.sql /docker-entrypoint-initdb.d/
 
-# Expose port 8080 for Cloud Run
+# Configure Apache to listen on the Cloud Run PORT
+RUN sed -i "s/Listen 80/Listen ${PORT:-8080}/" /etc/apache2/ports.conf
+ENV APACHE_RUN_PORT=${PORT:-8080}
+
+# Expose port for Cloud Run
 EXPOSE 8080
 
 # Start MySQL and Apache
