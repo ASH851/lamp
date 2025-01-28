@@ -38,11 +38,13 @@ jobs:
           push: true
           tags: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lamp-repo/lamp-app:${{ github.sha }}
 
-      # Step 6: Deploy the container to Cloud Run
+      # Step 6: Deploy to Cloud Run with Cloud SQL connection
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy lamp-app \
             --image us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/lamp-repo/lamp-app:${{ github.sha }} \
             --region us-central1 \
             --platform managed \
-            --allow-unauthenticated
+            --allow-unauthenticated \
+            --add-cloudsql-instances ${{ secrets.CLOUD_SQL_INSTANCE_ID }} \
+            --set-env-vars DB_HOST=/cloudsql/${{ secrets.CLOUD_SQL_INSTANCE_ID }},DB_USER=${{ secrets.DB_USER }},DB_PASSWORD=${{ secrets.DB_PASSWORD }},DB_NAME=${{ secrets.DB_NAME }}
