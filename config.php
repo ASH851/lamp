@@ -1,7 +1,7 @@
 <?php
-$host = 'lamp-db'; 
-$username = 'ashwani';
-$password = 'ashwani';
+$host = 'localhost'; // Use 'localhost' for MySQL inside the same container
+$username = 'ashwani'; 
+$password = 'ashwani'; 
 $database = 'registered';
 
 $conn = mysqli_connect($host, $username, $password, $database);
