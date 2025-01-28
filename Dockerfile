@@ -1,23 +1,26 @@
-# Use an official PHP image with Apache
+# Base Image
 FROM php:8.1-apache
 
-# Install required PHP extensions and tools
+# Install required packages and PHP extensions
 RUN apt-get update && apt-get install -y \
-    mariadb-client \
-    libpng-dev libjpeg-dev libfreetype6-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql mysqli gd
+    mariadb-server \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    && docker-php-ext-install mysqli gd \
+    && docker-php-ext-enable mysqli
 
-# Copy application files to the container
-WORKDIR /var/www/html
+# Configure MySQL
+RUN service mysql start && mysql -e "CREATE DATABASE registered;" \
+    && mysql -e "CREATE USER 'ashwani'@'localhost' IDENTIFIED BY 'ashwani';" \
+    && mysql -e "GRANT ALL PRIVILEGES ON registered.* TO 'ashwani'@'localhost';" \
+    && mysql -e "FLUSH PRIVILEGES;"
+
+# Copy app files
 COPY . /var/www/html
 
-# Ensure Apache serves on the Cloud Run expected port
-ENV PORT=8080
-RUN sed -i "s/Listen 80/Listen ${PORT}/" /etc/apache2/ports.conf
+# Expose port 80 for Apache
+EXPOSE 80
 
-# Expose the Cloud Run port
-EXPOSE 8080
-
-# Start Apache
-CMD ["apache2-foreground"]
+# Start MySQL and Apache on container start
+CMD service mysql start && apache2-foreground
