@@ -1,17 +1,15 @@
-# Use official PHP image with Apache
-FROM php:7.4-apache
+# Example Dockerfile for a PHP LAMP app
+FROM php:8.0-apache
 
-# Install MySQL client
-RUN apt-get update && apt-get install -y mysql-client
+# Install dependencies
+RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli
 
-# Enable apache mod_rewrite
-RUN a2enmod rewrite
+# Set Apache to listen on port 8080
+ENV APACHE_RUN_PORT=8080
+EXPOSE 8080
 
-# Copy application files to Apache server directory
+# Copy application files
 COPY . /var/www/html/
 
-# Set permissions for files
-RUN chown -R www-data:www-data /var/www/html/
-
-# Expose port 80
-EXPOSE 80
+# Start the Apache server
+CMD ["apache2-foreground"]
