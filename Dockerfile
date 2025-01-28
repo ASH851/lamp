@@ -1,28 +1,34 @@
 # Use the official PHP image with Apache
 FROM php:8.0-apache
 
-# Install MySQL client and Cloud SQL connector
+# Install required dependencies
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
-    default-mysql-client
+    default-mysql-client \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install necessary PHP extensions (mysqli and pdo_mysql)
+# Install necessary PHP extensions
 RUN docker-php-ext-install mysqli pdo pdo_mysql
 
-# Install Cloud SQL connector
-RUN apt-get install -y curl
-RUN curl -sSL https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -o /cloud_sql_proxy
-RUN chmod +x /cloud_sql_proxy
+# Download and configure Cloud SQL Proxy
+RUN curl -sSL https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -o /cloud_sql_proxy \
+    && chmod +x /cloud_sql_proxy
 
-# Expose port 8080 for Cloud Run
+# Set the port for Cloud Run
 ENV PORT 8080
 EXPOSE 8080
 
-# Enable Apache mod_rewrite and copy the app
+# Enable Apache mod_rewrite and configure virtual hosts
 RUN a2enmod rewrite
 COPY . /var/www/html/
 
-# Command to run the Cloud SQL Proxy and Apache
-CMD /cloud_sql_proxy -dir=/cloudsql -project=$GOOGLE_CLOUD_PROJECT -instances=$CLOUD_SQL_CONNECTION_NAME & apache2-foreground
+# Configure Apache to listen on the PORT environment variable
+RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf \
+    && sed -i 's/80/${PORT}/g' /etc/apache2/ports.conf
+
+# Start Cloud SQL Proxy and Apache with a proper command
+CMD exec /cloud_sql_proxy -dir=/cloudsql -instances=$CLOUD_SQL_CONNECTION_NAME & \
+    exec apache2-foreground
