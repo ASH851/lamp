@@ -8,8 +8,8 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     default-mysql-client
 
-# Install MySQL ND and necessary extensions
-RUN apt-get install -y gcc g++ make && pecl install mysqlnd && docker-php-ext-enable mysqlnd
+# Install necessary PHP extensions (mysqli and pdo_mysql)
+RUN docker-php-ext-install mysqli pdo pdo_mysql
 
 # Install Cloud SQL connector
 RUN apt-get install -y curl
