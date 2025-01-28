@@ -1,5 +1,5 @@
 <?php
-$servername = '/cloudsql/' . getenv('DB_HOST'); // This will use the Cloud SQL socket
+$servername = getenv('DB_HOST');  // DB_HOST should already include /cloudsql/[INSTANCE_CONNECTION_NAME]
 $username = getenv('DB_USER');
 $password = getenv('DB_PASSWORD');
 $dbname = getenv('DB_NAME');
