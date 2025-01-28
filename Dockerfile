@@ -20,9 +20,9 @@ RUN chown -R www-data:www-data /var/www/html/ \
 # Copy the MySQL initialization script
 COPY init.sql /docker-entrypoint-initdb.d/
 
-# Configure Apache to listen on the dynamic PORT environment variable
-RUN sed -i 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf && \
-    sed -i 's/:80/:${PORT}/g' /etc/apache2/sites-available/000-default.conf
+# Configure Apache to listen on the Cloud Run PORT (default: 8080)
+RUN sed -i 's/Listen 80/Listen ${PORT:-8080}/g' /etc/apache2/ports.conf && \
+    sed -i 's/:80/:${PORT:-8080}/g' /etc/apache2/sites-available/000-default.conf
 
 # Enable Apache modules
 RUN a2enmod rewrite
@@ -38,7 +38,7 @@ ENV APACHE_PID_FILE /var/run/apache2/apache2.pid
 # Create required directories for Apache
 RUN mkdir -p $APACHE_RUN_DIR $APACHE_LOG_DIR
 
-# Expose port 8080 for Cloud Run
+# Expose the port for Cloud Run (8080)
 EXPOSE 8080
 
 # Start MySQL service and Apache
