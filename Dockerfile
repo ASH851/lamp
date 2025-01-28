@@ -3,9 +3,10 @@ FROM php:8.1-apache
 
 # Install required PHP extensions and tools
 RUN apt-get update && apt-get install -y \
+    mariadb-client \
     libpng-dev libjpeg-dev libfreetype6-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql gd
+    && docker-php-ext-install pdo_mysql mysqli gd
 
 # Copy application files to the container
 WORKDIR /var/www/html
