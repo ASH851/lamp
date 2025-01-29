@@ -2,7 +2,7 @@
 // Get Cloud SQL public IP and credentials from environment variables
 $db_host = getenv('CLOUD_SQL_IP');  // Public IP of the MySQL instance
 $db_user = getenv('DB_USERNAME') ?: 'ashwani';  // MySQL user
-$db_pass = getenv('DB_PASSWORD') ?: 'ashwani';  // MySQL password
+$db_pass = getenv('DB_PASSWORD') ?: 'ashwanik';  // MySQL password
 $db_name = getenv('DB_NAME') ?: 'lamp_db';  // MySQL database name
 
 // Debugging: Print connection info (check logs in Cloud Run)
