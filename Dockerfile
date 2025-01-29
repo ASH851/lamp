@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
-    default-mysql-client \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -29,6 +28,9 @@ COPY . /var/www/html/
 RUN sed -i 's/80/${PORT}/g' /etc/apache2/sites-available/000-default.conf \
     && sed -i 's/80/${PORT}/g' /etc/apache2/ports.conf
 
-# Start Cloud SQL Proxy and Apache with a proper command
-CMD exec /cloud_sql_proxy -dir=/cloudsql -instances=$CLOUD_SQL_CONNECTION_NAME & \
-    exec apache2-foreground
+# Set default value for CLOUD_SQL_CONNECTION_NAME
+ENV CLOUD_SQL_CONNECTION_NAME "gcp-learning-2008:us-central1:ashwani"
+
+# Start Cloud SQL Proxy and Apache in the background correctly
+CMD /cloud_sql_proxy -dir=/cloudsql -instances=$CLOUD_SQL_CONNECTION_NAME & \
+    apache2-foreground
