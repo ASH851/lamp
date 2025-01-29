@@ -1,12 +1,12 @@
 <?php
-// Use Cloud SQL Unix Socket if available, else fallback to localhost
-$db_socket = getenv('CLOUD_SQL_CONNECTION_NAME');
+// Get Cloud SQL connection details from environment variables
+$db_socket = getenv('CLOUD_SQL_CONNECTION_NAME');  // Cloud SQL Unix socket
 $db_host = $db_socket ? 'localhost' : '127.0.0.1';
 $db_port = $db_socket ? "/cloudsql/$db_socket" : '3306';
 
-// Retrieve credentials from environment variables
-$db_user = getenv('DB_USERNAME') ?: 'ashwani';
-$db_pass = getenv('DB_PASSWORD') ?: 'ashwani';
+// Use the root user credentials (from secrets)
+$db_user = getenv('DB_USERNAME') ?: 'root';
+$db_pass = getenv('DB_PASSWORD') ?: '';
 $db_name = getenv('DB_NAME') ?: 'lamp_db';
 
 // Establish the database connection
