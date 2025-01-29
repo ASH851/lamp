@@ -5,15 +5,15 @@ on:
     branches: [ main ]
 
 env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT }}  # Ensure this is correctly set from GitHub secrets
+  PROJECT_ID: ${{ secrets.GCP_PROJECT }}
   REGION: us-central1
   SERVICE_NAME: lamp-service
   REPOSITORY: my-repo
   IMAGE: lamp-image
-  CLOUD_SQL_CONNECTION_NAME: ${{ secrets.CLOUD_SQL_CONNECTION_NAME }}  # Cloud SQL connection name (secret)
-  DB_USERNAME: ${{ secrets.DB_USERNAME }}  # DB username (secret)
-  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}  # DB password (secret)
-  DB_NAME: lamp_db  # Your database name
+  CLOUD_SQL_CONNECTION_NAME: ${{ secrets.CLOUD_SQL_CONNECTION_NAME }}
+  DB_USERNAME: ${{ secrets.DB_USERNAME }}
+  DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  DB_NAME: lamp_db
 
 jobs:
   build-deploy:
@@ -46,12 +46,12 @@ jobs:
     - name: Build and Push Docker Image to Artifact Registry
       uses: docker/build-push-action@v2
       with:
-        context: .  # Set the build context to the repository root
-        file: ./Dockerfile  # Ensure Dockerfile is in the root
+        context: .
+        file: ./Dockerfile
         push: true
         tags: us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
 
-    # Step 6: Debug environment variables (for troubleshooting)
+    # Step 6: Debug environment variables
     - name: Debug environment variables
       run: |
         echo "CLOUD_SQL_CONNECTION_NAME: $CLOUD_SQL_CONNECTION_NAME"
@@ -69,6 +69,8 @@ jobs:
         image: us-central1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE }}:${{ github.sha }}
         env_vars: |
           CLOUD_SQL_CONNECTION_NAME=${{ secrets.CLOUD_SQL_CONNECTION_NAME }}
+          DB_HOST=localhost
+          DB_PORT=/cloudsql/${{ secrets.CLOUD_SQL_CONNECTION_NAME }}
           DB_USERNAME=${{ secrets.DB_USERNAME }}
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           DB_NAME=${{ env.DB_NAME }}
