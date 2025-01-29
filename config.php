@@ -7,8 +7,8 @@ $db_host = 'localhost';
 $db_port = "/cloudsql/$db_socket";  
 
 // Get credentials from environment variables
-$db_user = getenv('DB_USERNAME') ?: 'root';
-$db_pass = getenv('DB_PASSWORD') ?: '';
+$db_user = getenv('DB_USERNAME') ?: 'ashwani';
+$db_pass = getenv('DB_PASSWORD') ?: 'ashwani';
 $db_name = getenv('DB_NAME') ?: 'lamp_db';
 
 // Debugging: Print connection info (check logs in Cloud Run)
